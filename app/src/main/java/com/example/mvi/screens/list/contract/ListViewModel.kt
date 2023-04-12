@@ -2,7 +2,6 @@ package com.example.mvi.screens.list.contract
 
 import androidx.lifecycle.viewModelScope
 import com.example.mvi.core.BaseViewModel
-import com.example.mvi.core.Response
 import com.example.mvi.screens.list.contract.ListContract.Effect
 import com.example.mvi.screens.list.contract.ListContract.Intent
 import com.example.mvi.screens.list.contract.ListContract.State
@@ -28,8 +27,8 @@ class ListViewModel : BaseViewModel<State, Intent, Effect>() {
         viewModelScope.launch(dispatcher) {
             setState { State.Loading }
             delay(2000L)
-            val safeResponse = Response.safeCall(call = { exampleList() })
-            safeResponse.setState { response ->
+            val safeResult = runCatching { exampleList() }
+            safeResult.setState { response ->
                 response.toListState()
             }
         }

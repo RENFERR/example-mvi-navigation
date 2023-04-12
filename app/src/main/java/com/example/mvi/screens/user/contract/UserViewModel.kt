@@ -2,7 +2,6 @@ package com.example.mvi.screens.user.contract
 
 import androidx.lifecycle.viewModelScope
 import com.example.mvi.core.BaseViewModel
-import com.example.mvi.core.Response
 import com.example.mvi.screens.user.contract.UserContract.Effect
 import com.example.mvi.screens.user.contract.UserContract.Intent
 import com.example.mvi.screens.user.contract.UserContract.State
@@ -27,9 +26,8 @@ class UserViewModel : BaseViewModel<State, Intent, Effect>() {
         viewModelScope.launch(context = dispatcher) {
             setState { State.Loading }
             delay(1000L)
-            val safeResponse = Response.safeCall(call = { username() })
-
-            safeResponse.setState { response ->
+            val safeResult = kotlin.runCatching { username() }
+            safeResult.setState { response ->
                 response.toUserState()
             }
         }

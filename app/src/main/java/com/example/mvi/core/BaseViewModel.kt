@@ -58,14 +58,13 @@ abstract class BaseViewModel<
         _state.value = newState
     }
 
-    protected fun <T> Response<T>.setState(
-        reduce: State.(Response<T>) -> State
+    protected fun <T> Result<T>.setState(
+        reduce: State.(Result<T>) -> State
     ) {
-        if (this is Response.Failure && this.exception is NotAuthorizedException) {
-            viewModelScope.launch { _isLogged.send(element = false) }
-        } else {
-            _state.value = currentState.reduce(this)
+        if (exceptionOrNull() is NotAuthorizedException) viewModelScope.launch {
+            _isLogged.send(element = false)
         }
+        else _state.value = currentState.reduce(this)
     }
 
     protected fun setEffect(builder: () -> Effect) {
