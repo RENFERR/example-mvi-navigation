@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">MVI Example</string>
+    <string name="not_auth_message">Authorization time has expired. Please login again</string>
+    <string name="unknown_exception">Unknown exception</string>
+    <string name="title_user_screen">User</string>
+    <string name="button_update_screen">Update Screen</string>
+    <string name="title_list_screen">Items</string>
+    <string name="message_empty_items">You have no Items yet</string>
+    <string name="item">Item:</string>
+    <string name="username">Username</string>
+    <string name="no_data">No data</string>
+    <string name="title_login_screen">Login screen</string>
+    <string name="button_authenticate">Authenticate</string>
+</resources>
