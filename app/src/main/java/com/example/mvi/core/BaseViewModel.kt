@@ -2,11 +2,14 @@ package com.example.mvi.core
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mvi.utils.NotAuthorizedException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel<
@@ -31,9 +34,6 @@ abstract class BaseViewModel<
     private val _effect: Channel<Effect> = Channel()
     val effect = _effect.receiveAsFlow()
 
-    private val _isLogged: Channel<Boolean> = Channel()
-    val isLogged = _isLogged.receiveAsFlow()
-
     init {
         subscribeEvents()
     }
@@ -56,15 +56,6 @@ abstract class BaseViewModel<
     protected fun setState(reduce: State.() -> State) {
         val newState = currentState.reduce()
         _state.value = newState
-    }
-
-    protected fun <T> Result<T>.setState(
-        reduce: State.(Result<T>) -> State
-    ) {
-        if (exceptionOrNull() is NotAuthorizedException) viewModelScope.launch {
-            _isLogged.send(element = false)
-        }
-        else _state.value = currentState.reduce(this)
     }
 
     protected fun setEffect(builder: () -> Effect) {
