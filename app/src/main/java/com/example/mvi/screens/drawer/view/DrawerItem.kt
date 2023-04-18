@@ -1,6 +1,5 @@
-package com.example.mvi.ui.elements.drawer
+package com.example.mvi.screens.drawer.view
 
-import android.os.Parcelable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -8,33 +7,43 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.List
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.mvi.destinations.DirectionDestination
 import com.example.mvi.destinations.ListScreenDestination
 import com.example.mvi.destinations.LoginScreenDestination
 import com.example.mvi.destinations.UserScreenDestination
 import com.example.mvi.ui.theme.MVIExampleTheme
-import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 
-@Parcelize
-sealed class DrawerItem(val title: String, val icon: @RawValue ImageVector) : Parcelable {
-    object List : DrawerItem(title = "Items", icon = Icons.Rounded.List)
-    object User : DrawerItem(title = "User", icon = Icons.Rounded.Person)
-    object Logout : DrawerItem(title = "Logout", icon = Icons.Rounded.Logout)
-
-    companion object {
-        fun DrawerItem.toRoute(): String = when (this) {
-            List -> ListScreenDestination.route
-            Logout -> LoginScreenDestination.route
-            User -> UserScreenDestination.route
-        }
-    }
+sealed class DrawerItem(
+    val title: String,
+    val icon: ImageVector,
+    val direction: DirectionDestination
+) {
+    object List : DrawerItem(
+        title = "Items",
+        icon = Icons.Rounded.List,
+        direction = ListScreenDestination
+    )
+    object User : DrawerItem(
+        title = "User",
+        icon = Icons.Rounded.Person,
+        direction = UserScreenDestination
+    )
+    object Logout : DrawerItem(
+        title = "Logout",
+        icon = Icons.Rounded.Logout,
+        direction = LoginScreenDestination
+    )
 }
 
 @Composable
