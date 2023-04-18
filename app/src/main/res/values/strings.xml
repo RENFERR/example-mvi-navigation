@@ -7,7 +7,7 @@
     <string name="title_list_screen">Items</string>
     <string name="message_empty_items">You have no Items yet</string>
     <string name="item">Item:</string>
-    <string name="username">Username</string>
+    <string name="user_info">User:</string>
     <string name="no_data">No data</string>
     <string name="title_login_screen">Login screen</string>
     <string name="button_authenticate">Authenticate</string>

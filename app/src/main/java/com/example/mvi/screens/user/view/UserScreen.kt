@@ -1,7 +1,16 @@
 package com.example.mvi.screens.user.view
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,18 +21,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mvi.R
-import com.example.mvi.destinations.UserScreenDestination
 import com.example.mvi.screens.user.contract.UserContract.Intent
 import com.example.mvi.screens.user.contract.UserContract.State
 import com.example.mvi.screens.user.contract.UserViewModel
+import com.example.mvi.screens.user.models.User
 import com.example.mvi.ui.elements.bars.MenuTopBar
-import com.example.mvi.ui.elements.drawer.Drawer
-import com.example.mvi.ui.elements.drawer.DrawerItem
 import com.example.mvi.ui.elements.loading.LoadingScreen
 import com.example.mvi.ui.theme.MVIExampleTheme
-import com.example.mvi.utils.NavigatorExtend.logoutWithDialog
 import com.example.mvi.utils.NavigatorExtend.showErrorDialog
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -36,46 +42,28 @@ private sealed class Event {
 @Destination
 @Composable
 fun UserScreen(
-    viewModel: UserViewModel = viewModel(),
-    navigator: DestinationsNavigator
+    viewModel: UserViewModel = hiltViewModel(),
+    navigator: DestinationsNavigator,
+    drawerState: DrawerState
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-
-    val isLogged = viewModel.isLogged.collectAsState(initial = true).value
-    val logoutMessage = stringResource(id = R.string.not_auth_message)
     val state = viewModel.state.collectAsState().value
 
-    Drawer(
-        state = drawerState,
-        navigator = navigator,
-        currentPage = DrawerItem.User,
-        content = {
-            UserScreen(
-                state = state,
-                onIntent = viewModel::handleIntent,
-                onEvent = { event ->
-                    when (event) {
-                        is Event.OpenDrawer -> if (!drawerState.isOpen)
-                            scope.launch { drawerState.open() }
-                    }
-                }
-            )
+    UserScreen(
+        state = state,
+        onIntent = viewModel::handleIntent,
+        onEvent = { event ->
+            when (event) {
+                is Event.OpenDrawer -> if (!drawerState.isOpen)
+                    scope.launch { drawerState.open() }
+            }
         }
     )
     LaunchedEffect(state) {
         if (state is State.Failure) navigator.showErrorDialog(
             message = state.message.asString(context = context)
         )
-    }
-    LaunchedEffect(isLogged) {
-        if (!isLogged) {
-            navigator.logoutWithDialog(
-                message = logoutMessage,
-                currentRoute = UserScreenDestination.route
-            )
-        }
     }
 }
 
@@ -101,14 +89,13 @@ private fun UserScreen(
                 .padding(it)
         ) {
             when (state) {
-                is State.Idle -> {}
                 is State.Loading -> LoadingScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp)
                 )
                 is State.Loaded -> state.Content()
-                is State.Failure -> {}
+                else -> Unit
             }
             Button(
                 modifier = Modifier
@@ -127,7 +114,7 @@ private fun UserScreen(
 
 @Composable
 private fun State.Loaded.Content() {
-    this.data?.let { username ->
+    this.data?.let { user ->
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -136,13 +123,18 @@ private fun State.Loaded.Content() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(R.string.username),
+                    text = stringResource(R.string.user_info),
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = username,
+                    text = user.firstName + " " + user.secondName,
                     style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(
+                    text = user.email,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
@@ -161,7 +153,11 @@ private fun State.Loaded.Content() {
 @Composable
 private fun UserScreenPreview() {
     UserScreen(
-        state = State.Loaded(data = "Some username"),
+        state = State.Loaded(data = User(
+            firstName = "Kirill",
+            secondName = "Maenkov",
+            email = "someemail@gmail.com"
+        )),
         onIntent = {},
         onEvent = {}
     )
