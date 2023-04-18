@@ -1,11 +1,23 @@
 package com.example.mvi.screens.list.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -14,77 +26,58 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mvi.R
 import com.example.mvi.destinations.ItemScreenDestination
-import com.example.mvi.destinations.ListScreenDestination
 import com.example.mvi.screens.list.contract.ListContract.Intent
 import com.example.mvi.screens.list.contract.ListContract.State
 import com.example.mvi.screens.list.contract.ListViewModel
 import com.example.mvi.ui.elements.bars.MenuTopBar
-import com.example.mvi.ui.elements.drawer.Drawer
-import com.example.mvi.ui.elements.drawer.DrawerItem
 import com.example.mvi.ui.elements.loading.LoadingScreen
 import com.example.mvi.ui.theme.MVIExampleTheme
-import com.example.mvi.utils.NavigatorExtend.logoutWithDialog
 import com.example.mvi.utils.NavigatorExtend.showErrorDialog
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 private sealed class Event {
     object OpenDrawer : Event()
     data class ItemClick(val index: Int, val item: String) : Event()
 }
 
+@RootNavGraph(start = true)
 @Destination
 @Composable
 fun ListScreen(
-    viewModel: ListViewModel = viewModel(),
-    navigator: DestinationsNavigator
+    viewModel: ListViewModel = hiltViewModel(),
+    navigator: DestinationsNavigator,
+    drawerState: DrawerState
 ) {
     val context = LocalContext.current
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    val isLogged = viewModel.isLogged.collectAsState(initial = true).value
-    val logoutMessage = stringResource(id = R.string.not_auth_message)
     val state = viewModel.state.collectAsState().value
 
-    Drawer(
-        state = drawerState,
-        navigator = navigator,
-        currentPage = DrawerItem.List,
-        content = {
-            ListScreen(
-                state = state,
-                onIntent = viewModel::handleIntent,
-                onEvent = { event ->
-                    when (event) {
-                        is Event.OpenDrawer -> if (!drawerState.isOpen) scope.launch {
-                            drawerState.open()
-                        }
-                        is Event.ItemClick -> navigator.navigate(
-                            direction = ItemScreenDestination.invoke(item = event.item)
-                        )
-                    }
+    ListScreen(
+        state = state,
+        onIntent = viewModel::handleIntent,
+        onEvent = { event ->
+            when (event) {
+                is Event.OpenDrawer -> if (!drawerState.isOpen) scope.launch {
+                    drawerState.open()
                 }
-            )
+
+                is Event.ItemClick -> navigator.navigate(
+                    direction = ItemScreenDestination.invoke(item = event.item)
+                )
+            }
         }
     )
     LaunchedEffect(state) {
         if (state is State.Failure) navigator.showErrorDialog(
             message = state.message.asString(context = context)
         )
-    }
-    LaunchedEffect(isLogged) {
-        if (!isLogged) {
-            navigator.logoutWithDialog(
-                message = logoutMessage,
-                currentRoute = ListScreenDestination.route
-            )
-        }
     }
 }
 
@@ -116,6 +109,7 @@ private fun ListScreen(
                     modifier = Modifier.fillMaxSize(),
                     onEvent = onEvent
                 )
+
                 is State.Loading -> LoadingScreen(
                     modifier = Modifier
                         .fillMaxSize()
