@@ -3,6 +3,8 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.parcelize'
     id 'com.google.devtools.ksp' version '1.8.10-1.0.9'
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -29,11 +31,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
     buildFeatures {
         compose true
@@ -45,6 +47,9 @@ android {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
+    }
+    kapt {
+        correctErrorTypes true
     }
 }
 
@@ -71,4 +76,8 @@ dependencies {
 
     implementation 'io.github.raamcosta.compose-destinations:core:1.8.38-beta'
     ksp 'io.github.raamcosta.compose-destinations:ksp:1.8.38-beta'
+
+    implementation 'com.google.dagger:hilt-android:2.44.2'
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
+    kapt 'com.google.dagger:hilt-compiler:2.44.2'
 }
