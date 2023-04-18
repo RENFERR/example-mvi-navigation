@@ -1,9 +1,18 @@
 package com.example.mvi.ui.elements.dialogs
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,9 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.mvi.ui.elements.dialogs.styles.ErrorDialogStyle
 import com.example.mvi.ui.theme.MVIExampleTheme
-import com.example.mvi.utils.NavigatorExtend.logout
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -31,14 +40,13 @@ fun ErrorDialog(
 
 @Destination(style = ErrorDialogStyle::class)
 @Composable
-fun LogoutDialog(
-    navigator: DestinationsNavigator,
-    currentRoute: String,
+fun ErrorDialog(
+    navController: NavController,
     message: String
 ) {
     ErrorDialog(
         message = message,
-        onClick = { navigator.logout(currentRoute = currentRoute) }
+        onClick = { navController.popBackStack() }
     )
 }
 
